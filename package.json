@@ -13,6 +13,7 @@
     "core-js": "^3.37.1",
     "pdfjs-dist": "^4.6.82",
     "roboto-fontface": "*",
+    "signature_pad": "^5.0.3",
     "vue": "^3.4.31",
     "vuetify": "^3.6.11"
   },
