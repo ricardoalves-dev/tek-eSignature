@@ -5,13 +5,15 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --fix --ignore-path .gitignore"
+    "lint": "eslint . --fix --ignore-path .gitignore",
+    "host": "vite --host"
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
     "pdfjs-dist": "^4.6.82",
     "roboto-fontface": "*",
+    "signature_pad": "^5.0.3",
     "vue": "^3.4.31",
     "vuetify": "^3.6.11"
   },
