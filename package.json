@@ -11,6 +11,7 @@
   "dependencies": {
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
+    "interactjs": "^1.10.27",
     "pdfjs-dist": "^4.6.82",
     "roboto-fontface": "*",
     "signature_pad": "^5.0.3",
