@@ -9,3 +9,9 @@
 <script lang="ts" setup>
   //
 </script>
+
+<style>
+  body {
+    background-color: #525659;
+  }
+</style>

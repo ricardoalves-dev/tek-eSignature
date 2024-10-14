@@ -1,0 +1,1 @@
+export type SignatureType = 'jpeg' | 'png' | 'svg';
