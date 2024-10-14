@@ -28,6 +28,7 @@ const pdfPath = computed(() => new URL(props.pdfPath, import.meta.url).href);
 const pdfFileName = computed(() => pdfPath.value.split("/").pop());
 const router = useRouter();
 const canvasVisualSizeDivider = 1.5;
+const pagesCanvas = ref<HTMLCanvasElement[]>([]);
 
 let pdfDoc: PDFDocumentProxy;
 const mask = "###############";
@@ -45,6 +46,7 @@ onMounted(async () => {
 
   numberOfPages.value = pdfDoc.numPages;
   currentPage.value = 1;
+  pagesCanvas.value = [];
 
   if (await checkViewportBiggerThanScreen()) {
     await fitPagesToScreen();
@@ -83,6 +85,7 @@ function createPageCanvas(pageNumber: number): HTMLCanvasElement {
 
   createPageCanvasWrapper(canvas);
 
+  pagesCanvas.value.push(canvas);
   return canvas;
 }
 
@@ -108,7 +111,7 @@ async function checkViewportBiggerThanScreen(): Promise<boolean> {
   const page = await pdfDoc.getPage(1);
   const viewport = page!.getViewport({ scale: currentPageScale.value });
 
-  return (viewport.width * outputScale) / 2 > pdfViewer.value!.clientWidth;
+  return (viewport.width * outputScale) / canvasVisualSizeDivider > pdfViewer.value!.clientWidth;
 }
 
 async function printPage(
@@ -174,6 +177,12 @@ async function zoomOut() {
   currentPageScale.value *= 2 / 3;
   await printAllPages();
 }
+
+defineExpose({
+  pagesCanvas,
+  loadingPdfDoc
+});
+
 </script>
 
 <template>
@@ -269,7 +278,7 @@ html {
   overflow-x: auto;
 }
 
-#pdf-viewer {
+#pdf-viewer {  
   background-color: #525659;
   width: 100%;
   height: 100%;
