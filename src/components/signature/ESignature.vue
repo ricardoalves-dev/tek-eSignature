@@ -124,7 +124,7 @@ function saveSignature() {
 </v-container>
 </template>
 
-<style>
+<style scoped>
 #signature-canvas {    
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 5px;

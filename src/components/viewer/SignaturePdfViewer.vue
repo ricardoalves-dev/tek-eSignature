@@ -4,7 +4,8 @@ import THintButton from "tek-components-vue3-ts/src/components/button/THintButto
 import ESignature from '../signature/ESignature.vue';
 import { ISignatureImage } from '../signature/ISignatureImage';
 import { nextTick, ref } from 'vue';
-import { InteractiveElement } from '../interactive/InteractiveElement';
+import { SignatureCanvas } from '../interactive/SignatureCanvas';
+import { jsPDF } from "jspdf";
 
 defineProps<{
   pdfPath: string;  
@@ -17,25 +18,67 @@ defineEmits<{
 const showSignaturePad = ref(false);
 const viewerRef = ref();
 const isSigned = ref(false);
+let signatureCanvas: SignatureCanvas;
+let src = '';
 
 function onSaveSignature(signature: ISignatureImage) {
     showSignaturePad.value = false;    
     const lastPageCanvas = viewerRef.value.pagesCanvas[viewerRef.value.pagesCanvas.length - 1];
-    const div = document.createElement('div');        
-    new InteractiveElement(div, true, true, {
-        afterDelete: () => {
-            isSigned.value = false;
+    signatureCanvas = new SignatureCanvas(lastPageCanvas.width, lastPageCanvas.height, lastPageCanvas.style.width, lastPageCanvas.style.height);
+    
+    signatureCanvas.get().style.position = 'absolute';
+    signatureCanvas.get().style.left = '0';
+    signatureCanvas.get().style.top = '0';
+    signatureCanvas.get().id = 'signature-canvas';
+    lastPageCanvas.parentElement.appendChild(signatureCanvas.get());
+
+    // -10 Apenas para descolar do canto direito e inferior...
+    signatureCanvas.drawSignature(signature.dataURL, signatureCanvas.width - signature.width - 10 , signatureCanvas.height - signature.height - 10);
+
+    isSigned.value = true;
+    src = signature.dataURL;
+    nextTick(() => window.scrollTo(0, document.body.scrollHeight));
+}
+
+async function onSaveSignedPdf() {    
+
+    const pdf = new jsPDF({
+        unit: 'pt',
+        orientation: 'portrait',
+        format: [viewerRef.value.defaultViewport.width, viewerRef.value.defaultViewport.height],
+        putOnlyUsedFonts: true,
+        floatPrecision: 16,
+        compress: true,
+    });
+
+    viewerRef.value.pagesCanvas.forEach((canvas: HTMLCanvasElement, canvasIndex:  number) => {
+        if (canvasIndex > 0) {
+            pdf.addPage();
+        }
+
+        
+        if (canvas.parentElement === signatureCanvas.get().parentElement) {
+            console.log('aqui');
+            
+            const img = new Image();                       
+            img.src = src;
+
+            img.onload = () => {
+                canvas.getContext('2d')!.drawImage(signatureCanvas.getSignature().img, 
+                                                    signatureCanvas.getSignature().corners.topLeft.x,
+                                                    signatureCanvas.getSignature().corners.topLeft.y,
+                                                    signatureCanvas.getSignature().img.width,
+                                                    signatureCanvas.getSignature().img.height);                                                   
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 0, 0, viewerRef.value.defaultViewport.width, viewerRef.value.defaultViewport.height, '', 'FAST');    
+                signatureCanvas.get().remove();                             
+                pdf.save('novo_documento.pdf');                 
+            }            
+        }
+        else{
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 0, 0, viewerRef.value.defaultViewport.width, viewerRef.value.defaultViewport.height, '', 'FAST');                          
         }
     });   
-    const img = document.createElement('img');
-    img.setAttribute('src', signature.dataURL);       
-    img.style.width = '100%';
-    img.style.height = '100%';
-    div.appendChild(img);
-    lastPageCanvas.parentElement.appendChild(div); 
     
-    isSigned.value = true;
-    nextTick(() => window.scrollTo(0, document.body.scrollHeight));
 }
 </script>
 
@@ -55,6 +98,16 @@ function onSaveSignature(signature: ISignatureImage) {
                 @click="showSignaturePad = true"
                 :disabled="isSigned || viewerRef?.loadingPdfDoc"
             />
+            <THintButton 
+                hint="Salvar"
+                hint-position="bottom"
+                icon="mdi-file-check-outline"
+                variant="text"
+                color="white"
+                density="compact"
+                @click="onSaveSignedPdf"
+                :disabled="!isSigned || viewerRef?.loadingPdfDoc"
+            />
             <v-divider vertical class="mx-1"></v-divider>
         </template>        
     </PdfViewer>
@@ -62,6 +115,7 @@ function onSaveSignature(signature: ISignatureImage) {
         <ESignature
             :width="400"
             :height="100"
+            signature-type="svg"
             @on-cancel="showSignaturePad = false"
             @on-save="onSaveSignature" 
         />        
