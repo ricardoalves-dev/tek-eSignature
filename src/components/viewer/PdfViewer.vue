@@ -29,6 +29,10 @@ const pdfFileName = computed(() => pdfPath.value.split("/").pop());
 const router = useRouter();
 const canvasVisualSizeDivider = 1.5;
 const pagesCanvas = ref<HTMLCanvasElement[]>([]);
+const defaultViewport = {
+  width: 0,
+  height: 0,
+}
 
 let pdfDoc: PDFDocumentProxy;
 const mask = "###############";
@@ -44,6 +48,10 @@ onMounted(async () => {
   ).href;
   pdfDoc = await getPdf();
 
+  const page = await pdfDoc.getPage(1);
+  const vp = page.getViewport({scale: 1}) ;
+  defaultViewport.width = vp.width;
+  defaultViewport.height = vp.height;
   numberOfPages.value = pdfDoc.numPages;
   currentPage.value = 1;
   pagesCanvas.value = [];
@@ -180,7 +188,8 @@ async function zoomOut() {
 
 defineExpose({
   pagesCanvas,
-  loadingPdfDoc
+  loadingPdfDoc,
+  defaultViewport
 });
 
 </script>
