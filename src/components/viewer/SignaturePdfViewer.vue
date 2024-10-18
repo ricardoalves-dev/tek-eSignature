@@ -67,8 +67,8 @@ async function onSaveSignedPdf() {
                 canvas.getContext('2d')!.drawImage(signatureCanvas.getSignature().img, 
                                                     signatureCanvas.getSignature().corners.topLeft.x,
                                                     signatureCanvas.getSignature().corners.topLeft.y,
-                                                    signatureCanvas.getSignature().img.width,
-                                                    signatureCanvas.getSignature().img.height);                                                   
+                                                    signatureCanvas.getSignature().currentWidth,
+                                                    signatureCanvas.getSignature().currentHeight);                                                   
                 pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 0, 0, viewerRef.value.defaultViewport.width, viewerRef.value.defaultViewport.height, '', 'FAST');    
                 signatureCanvas.get().remove();                             
                 pdf.save('novo_documento.pdf');                 
