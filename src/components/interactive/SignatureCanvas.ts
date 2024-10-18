@@ -1,5 +1,5 @@
 import { SignatureCorner } from './SignatureCorner';
-import { Signature } from './Signature';
+import { Signature, CornersPositions } from './Signature';
 
 type Point = {
     x: number,
@@ -14,7 +14,9 @@ export class SignatureCanvas {
     private canvasHeightRatio: number;    
     private signature: Signature;    
     private draggingSignature: boolean = false;
-    private p: Point = {x: 0, y: 0};
+    private resizingSignature: boolean = false;
+    private resizingCorner: keyof CornersPositions | undefined;
+    private lastMousePosition: Point = { x: 0, y: 0 };
 
     constructor(readonly width: number, 
                 readonly height: number, 
@@ -53,16 +55,25 @@ export class SignatureCanvas {
     }
 
     private mouseMouveHandler(event: MouseEvent) {   
-        const { x, y } = this.getMouseXYInCanvasScale(event.clientX, event.clientY);        
-        const focusedCorner: SignatureCorner | undefined = Object.values(this.signature.corners).find(corner => corner.isMouseOver(x, y));
+        const { x, y } = this.getMouseXYInCanvasScale(event.clientX, event.clientY);                
 
         if (this.draggingSignature) {
-            this.moveSignature(x - this.p.x, y - this.p.y);
-            this.p.x = x;
-            this.p.y = y;
+            this.moveSignature(x - this.lastMousePosition.x, y - this.lastMousePosition.y);
+            this.lastMousePosition.x = x;
+            this.lastMousePosition.y = y;
+
             return;
         }
 
+        if (this.resizingSignature) {
+            this.resizeSignature(x, y);
+            this.lastMousePosition.x = x;
+            this.lastMousePosition.y = y;
+
+            return;
+        }
+
+        const focusedCorner: SignatureCorner | undefined = Object.values(this.signature.corners).find(corner => corner.isMouseOver(x, y));
         this.canvas.style.cursor = 'default';
         if (focusedCorner) {
             this.canvas.style.cursor = focusedCorner.cursor;
@@ -74,26 +85,57 @@ export class SignatureCanvas {
 
     private moveSignature(mouseXInCanvasScale: number, mouseYINCanvasScale: number) {             
         this.clearSignature(); 
-        this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x + mouseXInCanvasScale, this.signature.corners.topLeft.y + mouseYINCanvasScale, this.signature.img.width, this.signature.img.height);        
-        console.log(this.signature.img.src, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, this.signature.img.width, this.signature.img.height);
+        this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x + mouseXInCanvasScale, this.signature.corners.topLeft.y + mouseYINCanvasScale, this.signature.currentWidth, this.signature.currentHeight);                
     }    
+
+    private resizeSignature(mouseXInCanvasScale: number, mouseYINCanvasScale: number) {
+        if (!this.resizingCorner) {
+            return;
+        }
+        
+        this.clearSignature();          
+        switch(this.resizingCorner) {
+            case 'topLeft':                  
+                this.signature.draw(this.canvas2dContext, mouseXInCanvasScale, mouseYINCanvasScale, this.signature.corners.bottomRight.x - mouseXInCanvasScale, this.signature.corners.bottomRight.y - mouseYINCanvasScale);
+                return;
+            
+            case 'topRight':   
+                this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, mouseYINCanvasScale, mouseXInCanvasScale - this.signature.corners.bottomLeft.x, this.signature.corners.bottomLeft.y - mouseYINCanvasScale);
+                return;
+
+            case 'bottomRight':
+                this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, mouseXInCanvasScale - this.signature.corners.topLeft.x, mouseYINCanvasScale - this.signature.corners.topLeft.y);
+                return;
+
+            case 'bottomLeft':
+                this.signature.draw(this.canvas2dContext, mouseXInCanvasScale, this.signature.corners.topLeft.y, this.signature.corners.topRight.x - mouseXInCanvasScale, mouseYINCanvasScale - this.signature.corners.topRight.y);
+                return;
+        }  
+        
+    }
 
     private mouseDownHandler(event: MouseEvent) {
         this.clearSignature();
         const { x, y } = this.getMouseXYInCanvasScale(event.clientX, event.clientY);
-        if (!this.signature.isMouseOver(x, y)) {
-            this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, this.signature.img.width, this.signature.img.height, false);
+        let focusedCorner: keyof CornersPositions | undefined = Object.entries(this.signature.corners).find(keyValue => keyValue[1].isMouseOver(x, y))?.[0] as keyof CornersPositions;        
+
+        if(focusedCorner || this.signature.isMouseOver(x, y)) {
+            this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, this.signature.currentWidth, this.signature.currentHeight, true);
+            this.lastMousePosition.x = x;
+            this.lastMousePosition.y = y;
+            this.resizingSignature = focusedCorner !== undefined;      
+            this.resizingCorner =  focusedCorner;       
+            this.draggingSignature = !this.resizingSignature;
+            
             return;
         }
-
-        this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, this.signature.img.width, this.signature.img.height, true);
-        this.p.x = x;
-        this.p.y = y;
-        this.draggingSignature = true;
+        
+        this.signature.draw(this.canvas2dContext, this.signature.corners.topLeft.x, this.signature.corners.topLeft.y, this.signature.currentWidth, this.signature.currentHeight, false);                    
     }
 
     private mouseUpHandler(event: MouseEvent) {
         this.draggingSignature = false;
+        this.resizingSignature = false;
     }
 
     private getMouseXYInCanvasScale(mouseX: number, mouseY: number): Point {

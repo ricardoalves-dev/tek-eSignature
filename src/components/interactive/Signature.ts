@@ -10,6 +10,8 @@ export type CornersPositions = {
 export class Signature {
     corners: CornersPositions;
     img: HTMLImageElement;    
+    private _currentWidth: number = 0;
+    private _currentHeight: number = 0;
 
     constructor() {  
         this.img = new Image();        
@@ -22,30 +24,32 @@ export class Signature {
         this.corners.topLeft.cursor = 'nw-resize';
         this.corners.topRight.cursor = 'ne-resize';
         this.corners.bottomRight.cursor = 'se-resize';
-        this.corners.bottomLeft.cursor = 'sw-resize';
+        this.corners.bottomLeft.cursor = 'sw-resize';        
     }
 
-    draw(canvas2dContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, withCorners: boolean = true) {               
+    draw(canvas2dContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, withCorners: boolean = true) {                               
         canvas2dContext.drawImage(this.img, x, y, width, height);       
-        
+        this._currentWidth = width;
+        this._currentHeight = height;
+
         if (!withCorners) {
             return;
         }
-        
+                
         this.corners.topLeft.x = x;
         this.corners.topLeft.y = y;        
         this.corners.topLeft.draw(canvas2dContext);
 
-        this.corners.topRight.x = x + this.img.width;
+        this.corners.topRight.x = x + width;
         this.corners.topRight.y = y;        
         this.corners.topRight.draw(canvas2dContext);
 
-        this.corners.bottomRight.x = x + this.img.width;
-        this.corners.bottomRight.y = y + this.img.height;        
+        this.corners.bottomRight.x = x + width;
+        this.corners.bottomRight.y = y + height;        
         this.corners.bottomRight.draw(canvas2dContext);
 
         this.corners.bottomLeft.x = x;
-        this.corners.bottomLeft.y = y + this.img.height;        
+        this.corners.bottomLeft.y = y + height;        
         this.corners.bottomLeft.draw(canvas2dContext);
 
         this.corners.topLeft.lineTo(canvas2dContext, this.corners.topRight.x, this.corners.topRight.y);
@@ -56,5 +60,13 @@ export class Signature {
 
     isMouseOver(mouseX: number, mouseY: number): boolean {        
         return (mouseX > this.corners.topLeft.x && mouseX < this.corners.bottomRight.x) && (mouseY > this.corners.topLeft.y && mouseY < this.corners.bottomRight.y);
+    }
+
+    get currentWidth() : number {
+        return this._currentWidth;
+    }
+
+    get currentHeight() : number {
+        return this._currentHeight;
     }
 }
