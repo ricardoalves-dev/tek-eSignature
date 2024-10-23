@@ -5,6 +5,7 @@ import { PDFDocumentProxy } from "pdfjs-dist";
 import TButton from "tek-components-vue3-ts/src/components/button/TButton.vue";
 import THintButton from "tek-components-vue3-ts/src/components/button/THintButton.vue";
 import { useRouter } from "vue-router";
+import { ViewerEvents } from "./ViewerEvents";
 
 // Props
 const props = defineProps<{
@@ -12,11 +13,7 @@ const props = defineProps<{
 }>();
 
 // Eventos
-const emit = defineEmits<{
-  (e: "beforePrintPages"): void;
-  (e: "afterPrintPages"): void;
-  (e: "onPrintPagesError", error: Error): void;
-}>();
+const emit = defineEmits<ViewerEvents>();
 
 // Reativas
 const pdfViewer = ref<HTMLDivElement>();
@@ -29,10 +26,16 @@ const pdfFileName = computed(() => pdfPath.value.split("/").pop());
 const router = useRouter();
 const canvasVisualSizeDivider = 1.5;
 const pagesCanvas = ref<HTMLCanvasElement[]>([]);
-const defaultViewport = {
-  width: 0,
-  height: 0,
-}
+const viewports = {
+  default: {
+    width: 0,
+    height: 0,
+  },
+  initial: {
+    width: 0,
+    height: 0,
+  }
+};
 
 let pdfDoc: PDFDocumentProxy;
 const mask = "###############";
@@ -49,12 +52,17 @@ onMounted(async () => {
   pdfDoc = await getPdf();
 
   const page = await pdfDoc.getPage(1);
-  const vp = page.getViewport({scale: 1}) ;
-  defaultViewport.width = vp.width;
-  defaultViewport.height = vp.height;
+  let vp = page.getViewport({ scale: 1 });
+  viewports.default.width = vp.width;
+  viewports.default.height = vp.height;
+
+  vp = page.getViewport({ scale: currentPageScale.value });
+  viewports.initial.width = vp.width;
+  viewports.initial.height = vp.height;  
+
   numberOfPages.value = pdfDoc.numPages;
   currentPage.value = 1;
-  pagesCanvas.value = [];
+  pagesCanvas.value = [];  
 
   if (await checkViewportBiggerThanScreen()) {
     await fitPagesToScreen();
@@ -113,6 +121,8 @@ async function fitPagesToScreen() {
   currentPageScale.value = maxScale;
 
   await printAllPages();
+  
+  emit('onResize');
 }
 
 async function checkViewportBiggerThanScreen(): Promise<boolean> {
@@ -127,7 +137,7 @@ async function printPage(
   canvas: HTMLCanvasElement
 ): Promise<void> {
   const page = await pdfDoc.getPage(pageNum);
-  const viewport = page!.getViewport({ scale: currentPageScale.value });
+  const viewport = page!.getViewport({ scale: currentPageScale.value });  
 
   // Resolução
   canvas.width = Math.floor(viewport.width * outputScale);
@@ -179,17 +189,19 @@ function navigateToPage(pageNumber: number) {
 async function zoomIn() {
   currentPageScale.value *= 4 / 3;
   await printAllPages();
+  emit('onResize');
 }
 
 async function zoomOut() {
   currentPageScale.value *= 2 / 3;
   await printAllPages();
+  emit('onResize');
 }
 
 defineExpose({
   pagesCanvas,
   loadingPdfDoc,
-  defaultViewport
+  viewports,
 });
 
 </script>

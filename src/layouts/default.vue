@@ -3,9 +3,8 @@
     <v-main>
       <router-view />
     </v-main>
-
     <AppFooter />
-  </v-app>
+  </v-app>  
 </template>
 
 <script lang="ts" setup>

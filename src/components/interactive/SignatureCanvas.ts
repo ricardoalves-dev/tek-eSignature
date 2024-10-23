@@ -34,19 +34,20 @@ export class SignatureCanvas {
         this.canvas.addEventListener('mousedown', this.mouseDownHandler.bind(this));
         this.canvas.addEventListener('mouseup', this.mouseUpHandler.bind(this));        
         
-        this.canvas2dContext = this.canvas.getContext('2d')!;
-        this.canvas2dContext.strokeStyle = this.contextColor;
-        this.canvas2dContext.fillStyle = this.contextColor;
+        this.canvas2dContext = this.canvas.getContext('2d')!;        
 
         this.signature = new Signature();    
     } 
 
-    drawSignature(imgSrc: string, x: number, y: number, width?: number, height?: number) {
+    drawSignature(imgSrc: string, x: number, y: number, width: number, height: number) {
         this.clearSignature();
+        this.canvas2dContext.strokeStyle = this.contextColor;
+        this.canvas2dContext.fillStyle = this.contextColor;
+        
         this.signature.img.crossOrigin = 'anonymous';
         this.signature.img.src = imgSrc;
         this.signature.img.onload = () => {            
-            this.signature.draw(this.canvas2dContext, x, y, this.signature.img.width, this.signature.img.height);                                         
+            this.signature.draw(this.canvas2dContext, x, y, width, height);                                         
         }        
     }
 
