@@ -2,7 +2,8 @@
   <v-footer 
     height="40" 
     color="primary"
-    app>    
+    app
+    :style="{position: 'fixed'}">    
 
     <div
       class="text-caption"
