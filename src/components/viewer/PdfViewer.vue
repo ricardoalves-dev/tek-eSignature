@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import * as pdfjsLib from "pdfjs-dist";
 import { computed, ref } from "vue";
-import { PDFDocumentProxy } from "pdfjs-dist";
-import TButton from "tek-components-vue3-ts/src/components/button/TButton.vue";
-import THintButton from "tek-components-vue3-ts/src/components/button/THintButton.vue";
 import { useRouter } from "vue-router";
+import * as pdfjsLib from "pdfjs-dist";
+import { PDFDocumentProxy } from "pdfjs-dist";
 import { ViewerEvents } from "./ViewerEvents";
 
 // Props
@@ -212,14 +210,14 @@ defineExpose({
     <v-spacer></v-spacer>
     <v-divider vertical class="mx-1"></v-divider>
     <div>
-      <TButton
+      <v-btn 
         density="compact"
         variant="text"
         icon="mdi-menu-left"
         color="white"
         :disabled="currentPage === 1"
         @click="navigateToPreviousPage"
-      ></TButton>
+      />       
       <input
         id="pdf-viewer-toolbar-current-page"
         type="tel"
@@ -232,48 +230,42 @@ defineExpose({
         :disabled="loadingPdfDoc"
         @change="navigateToPage(currentPage)"
       />
-      <span> / {{ numberOfPages }}</span>
-      <TButton
+      <span> / {{ numberOfPages }} </span>
+      <v-btn
         density="compact"
         variant="text"
         icon="mdi-menu-right"
         color="white"
         :disabled="currentPage === numberOfPages || loadingPdfDoc"
         @click="navigateToNextPage"
-      ></TButton>
+      />
     </div>
     <v-divider vertical class="mx-1"></v-divider>
     <v-item-group>
-      <THintButton
-        hint="Aumentar zoom"
-        hint-position="bottom"
+      <v-btn        
         density="compact"
         variant="text"
         icon="mdi-magnify-plus-outline"
         color="white"
         :disabled="currentPageScale > 5 || loadingPdfDoc"
         @click="zoomIn"
-      ></THintButton>
-      <THintButton
-        hint="Diminuir zoom"
-        hint-position="bottom"
+      />
+      <v-btn        
         density="compact"
         variant="text"
         icon="mdi-magnify-minus-outline"
         color="white"
         :disabled="currentPageScale < 0.5 || loadingPdfDoc"
         @click="zoomOut"
-      ></THintButton>
-      <THintButton
-        hint="Ajustar a tela"
-        hint-position="bottom"
+      />
+      <v-btn        
         density="compact"
         variant="text"
         icon="mdi-fit-to-screen-outline"
         color="white"
         :disabled="loadingPdfDoc"
         @click="fitPagesToScreen"
-      ></THintButton>
+      />
     </v-item-group>
     <v-divider vertical class="mx-1"></v-divider>
     <slot name="toolbarButtons"></slot>
