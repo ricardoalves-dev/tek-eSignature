@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "@types/vue-the-mask": "^0.11.5",
     "core-js": "^3.37.1",
     "jspdf": "^2.5.2",
     "pdfjs-dist": "^4.6.82",
