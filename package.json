@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
-    "core-js": "^3.37.1",    
+    "core-js": "^3.37.1",
     "jspdf": "^2.5.2",
     "pdfjs-dist": "^4.6.82",
     "roboto-fontface": "*",
-    "signature_pad": "^5.0.3",    
+    "signature_pad": "^5.0.3",
     "vue": "^3.4.31",
+    "vue-the-mask": "^0.11.1",
     "vuetify": "^3.6.11"
   },
   "devDependencies": {
