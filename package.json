@@ -15,8 +15,7 @@
     "jspdf": "^2.5.2",
     "pdfjs-dist": "^4.6.82",
     "roboto-fontface": "*",
-    "signature_pad": "^5.0.3",
-    "tek-components-vue3-ts": "git+ssh://git@192.168.254.201:web/components/vuejs/tek-components-vue3-ts.git#semver:1.3.93",
+    "signature_pad": "^5.0.3",    
     "vue": "^3.4.31",
     "vuetify": "^3.6.11"
   },
