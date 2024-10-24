@@ -8,7 +8,7 @@
 import vuetify from './vuetify'
 import pinia from '../stores'
 import router from '../router'
-import VueTheMask from "vue-the-mask";
+import VueTheMask from 'vue-the-mask'
 
 // Types
 import type { App } from 'vue'

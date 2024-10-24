@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import PdfViewer from './PdfViewer.vue';
-import THintButton from "tek-components-vue3-ts/src/components/button/THintButton.vue";
 import ESignature from '../signature/ESignature.vue';
-import { ISignatureImage } from '../signature/ISignatureImage';
 import { nextTick, ref } from 'vue';
-import { SignatureCanvas } from '../interactive/SignatureCanvas';
 import { jsPDF } from "jspdf";
+import { SignatureCanvas } from '../interactive/SignatureCanvas';
+import { ISignatureImage } from '../signature/ISignatureImage';
 import { ViewerEvents } from './ViewerEvents';
 
 defineProps<{
@@ -109,9 +108,7 @@ function handleOnResize(): void {
         @on-resize="handleOnResize"     
     >
         <template #toolbarButtons>
-            <THintButton 
-                hint="Assinar" 
-                hint-position="bottom" 
+            <v-btn                 
                 icon="mdi-file-sign" 
                 variant="text" 
                 color="white" 
@@ -119,9 +116,7 @@ function handleOnResize(): void {
                 @click="showSignaturePad = true"
                 :disabled="isSigned || viewerRef?.loadingPdfDoc"
             />
-            <THintButton 
-                hint="Salvar"
-                hint-position="bottom"
+            <v-btn                 
                 icon="mdi-file-check-outline"
                 variant="text"
                 color="white"
